@@ -6,21 +6,16 @@ import openai
 def generate_seo_post(keyword, title, anchor_text, link_url):
     prompt = f"주제: {keyword}\n제목: {title}\n앵커텍스트: {anchor_text}\n링크: {link_url}\n\nSEO에 최적화된 블로그 글을 생성해 주세요. 글자 수는 1500~2000자로 제한하고, 노팔로우와 노스폰서 조건을 만족시켜 주세요."
     
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt}
-    ]
-
-    response = openai.ChatCompletion.create(
+    response = openai.Completion.create(
         model="gpt-3.5-turbo",
-        messages=messages,
-        max_tokens=2000,
+        prompt=prompt,
+        max_tokens=4000,
         n=1,
         stop=None,
-        temperature=0.7,
+        temperature=0.4,
     )
 
-    post_content = response.choices[0].message['content'].strip()
+    post_content = response.choices[0].text.strip()
     return post_content
 
 def create_wordpress_post(wp_url, wp_username, wp_password, keyword, title, anchor_text, link_url):
