@@ -5,15 +5,22 @@ import openai
 
 def generate_seo_post(keyword, title, anchor_text, link_url):
     prompt = f"주제: {keyword}\n제목: {title}\n앵커텍스트: {anchor_text}\n링크: {link_url}\n\nSEO에 최적화된 블로그 글을 생성해 주세요. 글자 수는 1500~2000자로 제한하고, 노팔로우와 노스폰서 조건을 만족시켜 주세요."
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
+    
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt}
+    ]
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages,
         max_tokens=2000,
         n=1,
         stop=None,
         temperature=0.7,
     )
-    post_content = response.choices[0].text.strip()
+
+    post_content = response.choices[0].message['content'].strip()
     return post_content
 
 def create_wordpress_post(wp_url, wp_username, wp_password, keyword, title, anchor_text, link_url):
@@ -47,6 +54,10 @@ def main():
         st.subheader("글밥용 블로그 글 생성")
 
         wp_url = st.text_input("워드프레스 사이트 주소")
+        
+        # 입력받은 워드프레스 사이트 주소에 /xmlrpc.php를 붙여줍니다.
+        if not wp_url.endswith("/xmlrpc.php"):
+            wp_url = wp_url.rstrip("/") + "/xmlrpc.php"
         wp_username = st.text_input("워드프레스 사용자 이름")
         wp_password = st.text_input("워드프레스 사용자 비밀번호", type="password")
         openai.api_key = st.text_input("OpenAI API 키", type="password")
