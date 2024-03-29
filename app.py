@@ -38,7 +38,7 @@ def create_wordpress_post(wp_url, wp_username, wp_password, keyword, title, anch
     return post_id
 
 def main():
-    st.title("포스트인컴 자동화 웹앱")
+    st.title("✨정씨드xGPT천재의 만남✨")
 
     menu = ["글밥용", "트위터 자동 업로드", "SEO용 글 작성"]
     choice = st.sidebar.selectbox("메뉴를 선택하세요", menu)
