@@ -65,7 +65,7 @@ def main():
         keyword = st.text_input("키워드를 입력하세요")
         title = st.text_input("키워드 제목을 입력하세요")
         anchor_text = st.text_input("앵커 텍스트를 입력하세요")
-        link_url = st.text_input("외부링크 주소를 입력하세요")
+        link_url = st.text_input("링크 주소를 입력하세요")
 
         if st.button("생성"):
             if wp_url and wp_username and wp_password and openai.api_key and keyword and title and anchor_text and link_url:
