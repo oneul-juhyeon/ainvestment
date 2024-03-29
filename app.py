@@ -83,6 +83,7 @@ def main():
 
     else:
         st.subheader("SEO 최적화 글 작성")
+
         st.warning("SEO 최적화 글 작성 기능은 아직 구현 중입니다.")
 
 if __name__ == '__main__':
