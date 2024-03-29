@@ -48,7 +48,7 @@ def main():
     st.title("🌱정씨드xGPT천재의 만남✨")
 
     menu = ["글밥용", "트위터 자동 업로드", "SEO용 글 작성"]
-    choice = st.sidebar.selectbox("메뉴를 선택하세요", menu)
+    choice = st.sidebar.selectbox("기능선택", menu)
 
     if choice == "글밥용":
         st.subheader("글밥용 블로그 글 생성")
@@ -65,7 +65,7 @@ def main():
         keyword = st.text_input("키워드를 입력하세요")
         title = st.text_input("키워드 제목을 입력하세요")
         anchor_text = st.text_input("앵커 텍스트를 입력하세요")
-        link_url = st.text_input("링크 주소를 입력하세요")
+        link_url = st.text_input("외부링크 주소를 입력하세요")
 
         if st.button("생성"):
             if wp_url and wp_username and wp_password and openai.api_key and keyword and title and anchor_text and link_url:
