@@ -4,34 +4,28 @@ from wordpress_xmlrpc.methods.posts import NewPost
 import openai
 
 # OpenAI API 키 설정
-# 이는 스크립트나 스트림릿 앱의 설정 파일에 안전하게 저장되어야 합니다.
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def generate_seo_post(keyword, title, anchor_text, link_url):
     prompt = f"주제: {keyword}\n제목: {title}\n앵커텍스트: {anchor_text}\n링크: {link_url}\n\nSEO에 최적화된 블로그 글을 생성해 주세요. 글자 수는 1500~2000자로 제한하고, 노팔로우와 노스폰서 조건을 만족시켜 주세요."
     
-    try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # 최신 GPT-3 모델 사용
-            prompt=prompt,
-            max_tokens=2000,
-            temperature=0.7,
-            top_p=1.0,
-            frequency_penalty=0.0,
-            presence_penalty=0.0
-        )
+    response = openai.Completion.create(
+        model="gpt-3.5-turbo",
+        prompt=prompt,
+        max_tokens=4000,
+        temperature=0.4,
+        top_p=1.0,
+        frequency_penalty=0.0,
+        presence_penalty=0.0
+    )
 
-        post_content = response.get('choices')[0].get('text', '').strip()
-        return post_content
-    except Exception as e:
-        st.error(f"OpenAI API 호출 중 오류가 발생했습니다: {str(e)}")
-        return ""
+    post_content = response.choices[0].text.strip()
+    return post_content
 
 def create_wordpress_post(wp_url, wp_username, wp_password, keyword, title, anchor_text, link_url):
     post_content = generate_seo_post(keyword, title, anchor_text, link_url)
 
     client = Client(wp_url, wp_username, wp_password)
-
     post = WordPressPost()
     post.title = title
     post.content = post_content
