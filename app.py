@@ -3,29 +3,31 @@ from wordpress_xmlrpc import Client, WordPressPost
 from wordpress_xmlrpc.methods.posts import NewPost
 import openai
 
-# OpenAI API 키 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
 def generate_seo_post(keyword, title, anchor_text, link_url):
     prompt = f"주제: {keyword}\n제목: {title}\n앵커텍스트: {anchor_text}\n링크: {link_url}\n\nSEO에 최적화된 블로그 글을 생성해 주세요. 글자 수는 1500~2000자로 제한하고, 노팔로우와 노스폰서 조건을 만족시켜 주세요."
     
-    response = openai.Completion.create(
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt}
+    ]
+
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        prompt=prompt,
-        max_tokens=4000,
-        temperature=0.4,
-        top_p=1.0,
-        frequency_penalty=0.0,
-        presence_penalty=0.0
+        messages=messages,
+        max_tokens=2000,
+        n=1,
+        stop=None,
+        temperature=0.7,
     )
 
-    post_content = response.choices[0].text.strip()
+    post_content = response.choices[0].message['content'].strip()
     return post_content
 
 def create_wordpress_post(wp_url, wp_username, wp_password, keyword, title, anchor_text, link_url):
     post_content = generate_seo_post(keyword, title, anchor_text, link_url)
 
     client = Client(wp_url, wp_username, wp_password)
+
     post = WordPressPost()
     post.title = title
     post.content = post_content
@@ -33,28 +35,25 @@ def create_wordpress_post(wp_url, wp_username, wp_password, keyword, title, anch
         'post_tag': ['AI', 'GPT'],
         'category': ['블로그']
     }
-    post.custom_fields = [{
+    post.custom_fields = []
+    post.custom_fields.append({
         'key': 'external_url',
         'value': f'<a href="{link_url}" rel="nofollow nosponsored">{anchor_text}</a>'
-    }]
+    })
 
     post_id = client.call(NewPost(post))
     return post_id
 
 def main():
-    st.title("🌱정씨드xGPT천재의 만남✨")
+    st.title("🌱정씨드xGPT천재✨")
 
     menu = ["글밥용", "트위터 자동 업로드", "SEO용 글 작성"]
-    choice = st.sidebar.selectbox("기능선택", menu)
+    choice = st.sidebar.selectbox("메뉴를 선택하세요", menu)
 
     if choice == "글밥용":
         st.subheader("글밥용 블로그 글 생성")
 
         wp_url = st.text_input("워드프레스 사이트 주소")
-        
-        # 입력받은 워드프레스 사이트 주소에 /xmlrpc.php를 붙여줍니다.
-        if not wp_url.endswith("/xmlrpc.php"):
-            wp_url = wp_url.rstrip("/") + "/xmlrpc.php"
         wp_username = st.text_input("워드프레스 사용자 이름")
         wp_password = st.text_input("워드프레스 사용자 비밀번호", type="password")
         openai.api_key = st.text_input("OpenAI API 키", type="password")
@@ -77,7 +76,6 @@ def main():
 
     else:
         st.subheader("SEO 최적화 글 작성")
-
         st.warning("SEO 최적화 글 작성 기능은 아직 구현 중입니다.")
 
 if __name__ == '__main__':
