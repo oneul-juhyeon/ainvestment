@@ -12,6 +12,8 @@ def process_chat_with_formatted_date_and_seconds(file_contents):
     users = []
     messages = []
     current_date = None
+    prev_user = None
+    prev_time = None
 
     date_pattern = re.compile(r'--------------- (\d{4}년 \d{1,2}월 \d{1,2}일) .+ ---------------')
     message_pattern = re.compile(r'\[(.+?)\] \[(오전|오후) (\d{1,2}:\d{2})\] (.+)')
@@ -41,6 +43,13 @@ def process_chat_with_formatted_date_and_seconds(file_contents):
             dates.append(full_datetime)
             users.append(user)
             messages.append(message)
+            
+            prev_user = user
+            prev_time = time
+        elif line.strip() == "#인증":
+            if prev_user and prev_time:
+                last_index = len(messages) - 1
+                messages[last_index] += " " + line.strip()
             
     df = pd.DataFrame({
         'Date': dates,
