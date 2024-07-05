@@ -142,73 +142,13 @@ def main():
         final_result_df = final_result_df[column_order]
         final_result_df.fillna(0, inplace=True)
 
+        # 챌린지 최종 성공 멤버 찾기
+        successful_members = final_result_df[final_result_df['총합'] >= 13]['User'].tolist()
+        successful_members_str = ', '.join(successful_members)
 
-        ## Message에서 #운동인증, #주간미션, #선언하기 태그별로 존재 여부를 확인하고 카운트하는 함수 추가
-        df['Declaration_cnt'] = df['Message'].apply(lambda x: 1 if '#선언하기' in x else 0)
-        df['WeeklyMission_cnt'] = df['Message'].apply(lambda x: 1 if '#주간미션' in x else 0)
-        df['ExerciseCertification_cnt'] = df['Message'].apply(lambda x: 1 if '#운동인증' in x else 0)
-
-
-        # 선언하기 날짜별 및 사용자별 카운트 집계
-        result_declaration = df.groupby(['Date', 'User'])['Declaration_cnt'].sum().reset_index()
-        final_result_declaration = result_declaration.pivot_table(index='User', columns='Date', values='Declaration_cnt', aggfunc='sum').reset_index()
-        final_result_declaration['Total'] = final_result_declaration.drop(columns='User').sum(axis=1)
-        
-        # 선언하기 상위 사용자 찾기 및 순위 부여
-        top_users_declaration = final_result_declaration.nlargest(1, 'Total')['User'].tolist()
-        final_result_declaration = final_result_declaration.sort_values(by='Total', ascending=False)
-        final_result_declaration['Rank'] = range(1, len(final_result_declaration) + 1)
-        
-        # 선언하기 최종 결과 데이터 프레임 조정
-        column_order_declaration = ['Rank', 'User', 'Total'] + sorted([col for col in final_result_declaration.columns if col not in ['User', 'Total', 'Rank']])
-        final_result_declaration = final_result_declaration[column_order_declaration]
-        final_result_declaration.fillna(0, inplace=True)
-
-        
-        # 주간미션 날짜별 및 사용자별 카운트 집계
-        result_weekly_mission = df.groupby(['Date', 'User'])['WeeklyMission_cnt'].sum().reset_index()
-        final_result_weekly_mission = result_weekly_mission.pivot_table(index='User', columns='Date', values='WeeklyMission_cnt', aggfunc='sum').reset_index()
-        final_result_weekly_mission['Total'] = final_result_weekly_mission.drop(columns='User').sum(axis=1)
-
-        # 주간미션 상위 사용자 찾기 및 순위 부여
-        top_users_weekly_mission = final_result_weekly_mission.nlargest(1, 'Total')['User'].tolist()
-        final_result_weekly_mission = final_result_weekly_mission.sort_values(by='Total', ascending=False)
-        final_result_weekly_mission['Rank'] = range(1, len(final_result_weekly_mission) + 1)
-        
-        # 최종 결과 데이터 프레임 조정
-        column_order_weekly_mission = ['Rank', 'User', 'Total'] + sorted([col for col in final_result_weekly_mission.columns if col not in ['User', 'Total', 'Rank']])
-        final_result_weekly_mission = final_result_weekly_mission[column_order_weekly_mission]
-        final_result_weekly_mission.fillna(0, inplace=True)
-
-        
-        # 운동인증 날짜별 및 사용자별 #ExerciseCertification 카운트 집계
-        result_exercise_certification = df.groupby(['Date', 'User'])['ExerciseCertification_cnt'].sum().reset_index()
-        final_result_exercise_certification = result_exercise_certification.pivot_table(index='User', columns='Date', values='ExerciseCertification_cnt', aggfunc='sum').reset_index()
-        final_result_exercise_certification['Total'] = final_result_exercise_certification.drop(columns='User').sum(axis=1)
-
-        # 어제 성공적으로 인증한 멤버들 찾기
-        successful_exercise_users_yesterday_str = ""
-        if yesterday in final_result_exercise_certification.columns:
-            successful_exercise_users_yesterday = final_result_exercise_certification[final_result_exercise_certification[yesterday] > 0]['User'].tolist()
-            if successful_exercise_users_yesterday:
-                successful_exercise_users_yesterday_str = ', '.join(successful_exercise_users_yesterday)
-
-        
-        # 운동인증 상위 사용자 찾기 및 순위 부여
-        top_users_exercise_certification = final_result_exercise_certification.nlargest(3, 'Total')['User'].tolist()
-        final_result_exercise_certification = final_result_exercise_certification.sort_values(by='Total', ascending=False)
-        final_result_exercise_certification['Rank'] = range(1, len(final_result_exercise_certification) + 1)
-        
-        # 최종 결과 데이터 프레임 조정
-        column_order_exercise_certification = ['Rank', 'User', 'Total'] + sorted([col for col in final_result_exercise_certification.columns if col not in ['User', 'Total', 'Rank']])
-        final_result_exercise_certification = final_result_exercise_certification[column_order_exercise_certification]
-        final_result_exercise_certification.fillna(0, inplace=True)
-
-
-        
-
-        # 데일리미션 결과 표시 (index=False로 설정하여 인덱스를 표시하지 않음)
+        # 메시지 생성
         messages.append(f"### 🔥 재테크 파워가 가장 높은 멤버는? \n지금까지 가장 인증을 많이 한 멤버는 {top_users_str}입니다. 부자 되시겠군요?")
+        messages.append(f"### 🤑 챌린지 최종 성공한 멤버는?\n{successful_members_str}입니다. 챌린지를 성공적으로 마치신 여러분 정말 축하드립니다! 그동안 열심히 참여해주셔서 감사합니다. 여러분의 노력이 앞으로의 재테크 여정에 큰 도움이 될 거예요!")
         messages.append(f"### 💝 어제 인증을 성공한 멤버는?\n{yesterday}에 인증을 성공한 멤버는 {successful_users_yesterday_str}입니다. 어제도 정말 수고 하셨어요!")
             
         for message in messages:
